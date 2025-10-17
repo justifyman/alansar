@@ -35,6 +35,36 @@ export type Database = {
         }
         Relationships: []
       }
+      hero: {
+        Row: {
+          background_image_url: string
+          created_at: string
+          description: string
+          id: string
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          background_image_url?: string
+          created_at?: string
+          description?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          background_image_url?: string
+          created_at?: string
+          description?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           category_id: string | null

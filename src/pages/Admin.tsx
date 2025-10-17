@@ -25,12 +25,21 @@ interface Video {
   thumbnail_url: string;
 }
 
+interface HeroData {
+  id: string;
+  title: string;
+  description: string;
+  background_image_url: string;
+  video_url: string | null;
+}
+
 const Admin = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
+  const [heroData, setHeroData] = useState<HeroData | null>(null);
   
   // Form states
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -41,6 +50,12 @@ const Admin = () => {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
+  
+  // Hero form states
+  const [heroTitle, setHeroTitle] = useState("");
+  const [heroDescription, setHeroDescription] = useState("");
+  const [heroBackgroundFile, setHeroBackgroundFile] = useState<File | null>(null);
+  const [heroVideoFile, setHeroVideoFile] = useState<File | null>(null);
 
   const ADMIN_PASSWORD_HASH = "alansaradmins26";
 
@@ -67,8 +82,15 @@ const Admin = () => {
   const fetchData = async () => {
     const { data: cats } = await supabase.from("categories").select("*").order("position");
     const { data: vids } = await supabase.from("videos").select("*");
+    const { data: hero } = await supabase.from("hero").select("*").single();
+    
     if (cats) setCategories(cats);
     if (vids) setVideos(vids);
+    if (hero) {
+      setHeroData(hero);
+      setHeroTitle(hero.title);
+      setHeroDescription(hero.description);
+    }
   };
 
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -173,6 +195,45 @@ const Admin = () => {
     }
   };
 
+  const handleUpdateHero = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!heroData) return;
+
+    setUploading(true);
+    try {
+      let backgroundUrl = heroData.background_image_url;
+      let videoUrl = heroData.video_url;
+
+      if (heroBackgroundFile) {
+        backgroundUrl = await uploadFile(heroBackgroundFile, "thumbnails");
+      }
+      if (heroVideoFile) {
+        videoUrl = await uploadFile(heroVideoFile, "videos");
+      }
+
+      const { error } = await supabase
+        .from("hero")
+        .update({
+          title: heroTitle,
+          description: heroDescription,
+          background_image_url: backgroundUrl,
+          video_url: videoUrl,
+        })
+        .eq("id", heroData.id);
+
+      if (error) throw error;
+
+      toast({ title: "Hero updated successfully" });
+      setHeroBackgroundFile(null);
+      setHeroVideoFile(null);
+      fetchData();
+    } catch (error) {
+      toast({ title: "Error updating hero", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -221,11 +282,73 @@ const Admin = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="videos" className="space-y-6">
+        <Tabs defaultValue="hero" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="hero">Hero Section</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="hero" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Edit Hero Section</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUpdateHero} className="space-y-4">
+                  <div>
+                    <Label htmlFor="heroTitle">Featured Title</Label>
+                    <Input
+                      id="heroTitle"
+                      value={heroTitle}
+                      onChange={(e) => setHeroTitle(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="heroDescription">Description</Label>
+                    <Textarea
+                      id="heroDescription"
+                      value={heroDescription}
+                      onChange={(e) => setHeroDescription(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="heroBackground">Background Image</Label>
+                    <Input
+                      id="heroBackground"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setHeroBackgroundFile(e.target.files?.[0] || null)}
+                    />
+                    {heroData?.background_image_url && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Current: {heroData.background_image_url.split('/').pop()}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="heroVideo">Play Now Video</Label>
+                    <Input
+                      id="heroVideo"
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => setHeroVideoFile(e.target.files?.[0] || null)}
+                    />
+                    {heroData?.video_url && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Current: {heroData.video_url.split('/').pop()}
+                      </p>
+                    )}
+                  </div>
+                  <Button type="submit" disabled={uploading}>
+                    {uploading ? "Updating..." : "Update Hero"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="videos" className="space-y-6">
             <Card>

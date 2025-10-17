@@ -58,7 +58,7 @@ const Index = () => {
       <Navbar onSearch={handleSearch} />
       <main>
         <Hero />
-        <div className="relative -mt-20 lg:-mt-32 z-10 pb-16">
+        <div className="relative -mt-20 lg:-mt-32 z-10 pb-16" data-categories>
           {categories.map((category) => {
             const categoryVideos = getVideosByCategory(category.id);
             if (categoryVideos.length === 0) return null;

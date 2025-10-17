@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        'war': ['"Black Ops One"', 'cursive'],
+        'war': ['"Bebas Neue"', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",
