@@ -31,11 +31,11 @@ const ContentRow = ({ title, videos }: ContentRowProps) => {
 
   return (
     <div className="group relative mb-8 lg:mb-12">
-      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-4 px-4 lg:px-16 xl:px-32">
+      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-4 px-4 lg:px-16">
         {title}
       </h2>
       
-      <div className="relative px-4 lg:px-16 xl:px-32">
+      <div className="relative px-4 lg:px-16">
         {/* Left Arrow */}
         {showLeftArrow && (
           <Button
