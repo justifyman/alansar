@@ -35,7 +35,7 @@ const ContentRow = ({ title, videos }: ContentRowProps) => {
         {title}
       </h2>
       
-      <div className="relative px-4 lg:px-16">
+      <div className="relative px-4 lg:px-16 pb-8 lg:pb-12 border-b border-white/20">
         {/* Left Arrow */}
         {showLeftArrow && (
           <Button
