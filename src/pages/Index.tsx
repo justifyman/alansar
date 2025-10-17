@@ -68,7 +68,7 @@ const Index = () => {
       <main>
         <Hero />
         <Announcements />
-        <div className="relative z-10 pb-16" data-categories>
+        <div className="relative -mt-8 lg:-mt-12 z-10 pb-16" data-categories>
           {categories.map((category) => {
             const categoryVideos = getVideosByCategory(category.id);
             if (categoryVideos.length === 0) return null;

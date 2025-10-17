@@ -33,11 +33,6 @@ const VideoCard = ({ image, title, onPlay }: VideoCardProps) => {
           </div>
         </div>
       </div>
-      
-      {/* Title on hover */}
-      <div className={`mt-2 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-        <h3 className="text-sm font-medium text-foreground">{title}</h3>
-      </div>
     </div>
   );
 };

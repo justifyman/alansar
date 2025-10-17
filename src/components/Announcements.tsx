@@ -27,7 +27,7 @@ const Announcements = () => {
   if (announcements.length === 0) return null;
 
   return (
-    <div className="px-4 lg:px-16 py-8 lg:py-12 mb-8 lg:mb-16">
+    <div className="px-4 lg:px-16 py-8 lg:py-12 mb-8 lg:mb-16 -mt-16 lg:-mt-24 relative z-10">
       <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-6 font-war">
         ANNOUNCEMENTS
       </h2>
