@@ -79,6 +79,7 @@ const Index = () => {
                   videos={categoryVideos.map((v) => ({
                     image: v.thumbnail_url,
                     title: v.title,
+                    description: v.description,
                     videoUrl: v.video_url,
                     onPlay: () => handlePlayVideo(v.video_url),
                   }))}

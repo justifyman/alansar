@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 
 interface ContentRowProps {
   title: string;
-  videos: Array<{ image: string; title: string; videoUrl: string; onPlay: () => void }>;
+  videos: Array<{ image: string; title: string; videoUrl: string; description?: string; onPlay: () => void }>;
 }
 
 const ContentRow = ({ title, videos }: ContentRowProps) => {
@@ -35,47 +35,50 @@ const ContentRow = ({ title, videos }: ContentRowProps) => {
         {title}
       </h2>
       
-      <div className="relative px-4 lg:px-16 pb-8 lg:pb-12 border-b border-white/20">
-        {/* Left Arrow */}
-        {showLeftArrow && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 hover:bg-background/90 backdrop-blur-sm h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => scroll("left")}
-          >
-            <ChevronLeft className="h-8 w-8" />
-          </Button>
-        )}
+      <div className="relative px-4 lg:px-16">
+        <div className="pb-8 lg:pb-12 border-b border-white/20">
+          {/* Left Arrow */}
+          {showLeftArrow && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 hover:bg-background/90 backdrop-blur-sm h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => scroll("left")}
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </Button>
+          )}
 
-        {/* Scrollable Content */}
-        <div
-          ref={scrollRef}
-          className="flex gap-3 lg:gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {videos.map((video, index) => (
-            <VideoCard 
-              key={index} 
-              image={video.image} 
-              title={video.title}
-              videoUrl={video.videoUrl}
-              onPlay={video.onPlay}
-            />
-          ))}
+          {/* Scrollable Content */}
+          <div
+            ref={scrollRef}
+            className="flex gap-3 lg:gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {videos.map((video, index) => (
+              <VideoCard 
+                key={index} 
+                image={video.image} 
+                title={video.title}
+                description={video.description}
+                videoUrl={video.videoUrl}
+                onPlay={video.onPlay}
+              />
+            ))}
+          </div>
+
+          {/* Right Arrow */}
+          {showRightArrow && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 hover:bg-background/90 backdrop-blur-sm h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => scroll("right")}
+            >
+              <ChevronRight className="h-8 w-8" />
+            </Button>
+          )}
         </div>
-
-        {/* Right Arrow */}
-        {showRightArrow && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 hover:bg-background/90 backdrop-blur-sm h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => scroll("right")}
-          >
-            <ChevronRight className="h-8 w-8" />
-          </Button>
-        )}
       </div>
     </div>
   );
