@@ -15,9 +15,9 @@ const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative container mx-auto px-4 lg:px-8 h-full flex items-end lg:items-center pb-20 lg:pb-32">
+      <div className="relative h-full flex items-end lg:items-center pb-20 lg:pb-32 pl-4 lg:pl-16">
         <div className="max-w-2xl space-y-4 lg:space-y-6">
-          <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
+          <h1 className="text-4xl lg:text-6xl xl:text-7xl font-war font-bold text-foreground leading-tight">
             The Last Guardian
           </h1>
           <p className="text-base lg:text-lg text-foreground/90 leading-relaxed">

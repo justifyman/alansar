@@ -1,50 +1,79 @@
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import ContentRow from "@/components/ContentRow";
-import thumbnail1 from "@/assets/thumbnail-1.jpg";
-import thumbnail2 from "@/assets/thumbnail-2.jpg";
-import thumbnail3 from "@/assets/thumbnail-3.jpg";
-import thumbnail4 from "@/assets/thumbnail-4.jpg";
-import thumbnail5 from "@/assets/thumbnail-5.jpg";
-import thumbnail6 from "@/assets/thumbnail-6.jpg";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Category {
+  id: string;
+  name: string;
+  position: number;
+}
+
+interface Video {
+  id: string;
+  title: string;
+  description: string;
+  category_id: string;
+  video_url: string;
+  thumbnail_url: string;
+}
 
 const Index = () => {
-  const trendingNow = [
-    { image: thumbnail1, title: "Shadow Protocol" },
-    { image: thumbnail2, title: "Love in Paris" },
-    { image: thumbnail3, title: "Beyond the Stars" },
-    { image: thumbnail4, title: "The Comedy Club" },
-    { image: thumbnail5, title: "Dark Whispers" },
-    { image: thumbnail6, title: "The Quest Begins" },
-  ];
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const popularOnAlAnsar = [
-    { image: thumbnail3, title: "Galactic Odyssey" },
-    { image: thumbnail5, title: "Midnight Terror" },
-    { image: thumbnail1, title: "Action Force" },
-    { image: thumbnail6, title: "Epic Fantasy" },
-    { image: thumbnail2, title: "Hearts Entwined" },
-    { image: thumbnail4, title: "Laugh Out Loud" },
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const newReleases = [
-    { image: thumbnail6, title: "Dragon's Legacy" },
-    { image: thumbnail4, title: "Comedy Central" },
-    { image: thumbnail5, title: "Horror House" },
-    { image: thumbnail2, title: "Romance Tonight" },
-    { image: thumbnail3, title: "Space Warriors" },
-    { image: thumbnail1, title: "Strike Force" },
-  ];
+  const fetchData = async () => {
+    const { data: cats } = await supabase
+      .from("categories")
+      .select("*")
+      .order("position");
+    const { data: vids } = await supabase.from("videos").select("*");
+    
+    if (cats) setCategories(cats);
+    if (vids) setVideos(vids);
+  };
+
+  const getVideosByCategory = (categoryId: string) => {
+    const categoryVideos = videos.filter((v) => v.category_id === categoryId);
+    if (searchQuery) {
+      return categoryVideos.filter((v) =>
+        v.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return categoryVideos;
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar onSearch={handleSearch} />
       <main>
         <Hero />
         <div className="relative -mt-20 lg:-mt-32 z-10 pb-16">
-          <ContentRow title="Trending Now" videos={trendingNow} />
-          <ContentRow title="Popular on AlAnsarMedia" videos={popularOnAlAnsar} />
-          <ContentRow title="New Releases" videos={newReleases} />
+          {categories.map((category) => {
+            const categoryVideos = getVideosByCategory(category.id);
+            if (categoryVideos.length === 0) return null;
+            return (
+              <div key={category.id} id={`category-${category.id}`}>
+                <ContentRow
+                  title={category.name}
+                  videos={categoryVideos.map((v) => ({
+                    image: v.thumbnail_url,
+                    title: v.title,
+                  }))}
+                />
+              </div>
+            );
+          })}
         </div>
       </main>
     </div>

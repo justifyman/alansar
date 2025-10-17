@@ -15,7 +15,7 @@ const VideoCard = ({ image, title }: VideoCardProps) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg">
+      <div className="relative aspect-video rounded-lg overflow-hidden">
         <img
           src={image}
           alt={title}
