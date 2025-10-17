@@ -33,6 +33,13 @@ interface HeroData {
   video_url: string | null;
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  position: number;
+}
+
 const Admin = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +47,7 @@ const Admin = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [heroData, setHeroData] = useState<HeroData | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   
   // Form states
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -56,6 +64,11 @@ const Admin = () => {
   const [heroDescription, setHeroDescription] = useState("");
   const [heroBackgroundFile, setHeroBackgroundFile] = useState<File | null>(null);
   const [heroVideoFile, setHeroVideoFile] = useState<File | null>(null);
+
+  // Announcement form states
+  const [announcementTitle, setAnnouncementTitle] = useState("");
+  const [announcementContent, setAnnouncementContent] = useState("");
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
 
   const ADMIN_PASSWORD_HASH = "alansaradmins26";
 
@@ -83,9 +96,11 @@ const Admin = () => {
     const { data: cats } = await supabase.from("categories").select("*").order("position");
     const { data: vids } = await supabase.from("videos").select("*");
     const { data: hero } = await supabase.from("hero").select("*").single();
+    const { data: announcs } = await supabase.from("announcements").select("*").order("position");
     
     if (cats) setCategories(cats);
     if (vids) setVideos(vids);
+    if (announcs) setAnnouncements(announcs);
     if (hero) {
       setHeroData(hero);
       setHeroTitle(hero.title);
@@ -234,6 +249,62 @@ const Admin = () => {
     }
   };
 
+  const handleAddAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.from("announcements").insert({
+      title: announcementTitle,
+      content: announcementContent,
+      position: announcements.length,
+    });
+    if (error) {
+      toast({ title: "Error adding announcement", variant: "destructive" });
+    } else {
+      toast({ title: "Announcement added" });
+      setAnnouncementTitle("");
+      setAnnouncementContent("");
+      fetchData();
+    }
+  };
+
+  const handleUpdateAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAnnouncement) return;
+    
+    const { error } = await supabase
+      .from("announcements")
+      .update({
+        title: announcementTitle,
+        content: announcementContent,
+      })
+      .eq("id", editingAnnouncement.id);
+    
+    if (error) {
+      toast({ title: "Error updating announcement", variant: "destructive" });
+    } else {
+      toast({ title: "Announcement updated" });
+      setEditingAnnouncement(null);
+      setAnnouncementTitle("");
+      setAnnouncementContent("");
+      fetchData();
+    }
+  };
+
+  const handleEditAnnouncement = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+    setAnnouncementTitle(announcement.title);
+    setAnnouncementContent(announcement.content);
+  };
+
+  const handleDeleteAnnouncement = async (id: string) => {
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Error deleting announcement", variant: "destructive" });
+    } else {
+      toast({ title: "Announcement deleted" });
+      fetchData();
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -285,6 +356,7 @@ const Admin = () => {
         <Tabs defaultValue="hero" className="space-y-6">
           <TabsList>
             <TabsTrigger value="hero">Hero Section</TabsTrigger>
+            <TabsTrigger value="announcements">Announcements</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
           </TabsList>
@@ -346,6 +418,88 @@ const Admin = () => {
                     {uploading ? "Updating..." : "Update Hero"}
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="announcements" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>{editingAnnouncement ? "Edit Announcement" : "Add New Announcement"}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={editingAnnouncement ? handleUpdateAnnouncement : handleAddAnnouncement} className="space-y-4">
+                  <div>
+                    <Label htmlFor="announcementTitle">Title</Label>
+                    <Input
+                      id="announcementTitle"
+                      value={announcementTitle}
+                      onChange={(e) => setAnnouncementTitle(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="announcementContent">Content</Label>
+                    <Textarea
+                      id="announcementContent"
+                      value={announcementContent}
+                      onChange={(e) => setAnnouncementContent(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="submit">
+                      {editingAnnouncement ? "Update" : "Add"} Announcement
+                    </Button>
+                    {editingAnnouncement && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingAnnouncement(null);
+                          setAnnouncementTitle("");
+                          setAnnouncementContent("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Existing Announcements</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {announcements.map((announcement) => (
+                    <div key={announcement.id} className="flex items-start justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{announcement.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{announcement.content}</p>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleEditAnnouncement(announcement)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleDeleteAnnouncement(announcement.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

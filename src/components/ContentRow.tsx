@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 
 interface ContentRowProps {
   title: string;
-  videos: Array<{ image: string; title: string }>;
+  videos: Array<{ image: string; title: string; videoUrl: string; onPlay: () => void }>;
 }
 
 const ContentRow = ({ title, videos }: ContentRowProps) => {
@@ -31,11 +31,11 @@ const ContentRow = ({ title, videos }: ContentRowProps) => {
 
   return (
     <div className="group relative mb-8 lg:mb-12">
-      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-4 px-4 lg:px-8">
+      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-4 px-4 lg:px-16 xl:px-32">
         {title}
       </h2>
       
-      <div className="relative px-4 lg:px-8">
+      <div className="relative px-4 lg:px-16 xl:px-32">
         {/* Left Arrow */}
         {showLeftArrow && (
           <Button
@@ -55,7 +55,13 @@ const ContentRow = ({ title, videos }: ContentRowProps) => {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {videos.map((video, index) => (
-            <VideoCard key={index} image={video.image} title={video.title} />
+            <VideoCard 
+              key={index} 
+              image={video.image} 
+              title={video.title}
+              videoUrl={video.videoUrl}
+              onPlay={video.onPlay}
+            />
           ))}
         </div>
 

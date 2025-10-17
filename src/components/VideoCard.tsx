@@ -4,9 +4,11 @@ import { useState } from "react";
 interface VideoCardProps {
   image: string;
   title: string;
+  videoUrl?: string;
+  onPlay?: () => void;
 }
 
-const VideoCard = ({ image, title }: VideoCardProps) => {
+const VideoCard = ({ image, title, onPlay }: VideoCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -14,6 +16,7 @@ const VideoCard = ({ image, title }: VideoCardProps) => {
       className="relative group cursor-pointer flex-shrink-0 w-64 lg:w-72 transition-all duration-300 hover:scale-105 hover:z-10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={onPlay}
     >
       <div className="relative aspect-video rounded-lg overflow-hidden">
         <img

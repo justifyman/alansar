@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import ContentRow from "@/components/ContentRow";
+import Announcements from "@/components/Announcements";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface Category {
   id: string;
@@ -23,6 +25,8 @@ const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -53,11 +57,17 @@ const Index = () => {
     setSearchQuery(query);
   };
 
+  const handlePlayVideo = (videoUrl: string) => {
+    setSelectedVideo(videoUrl);
+    setIsVideoDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar onSearch={handleSearch} />
       <main>
         <Hero />
+        <Announcements />
         <div className="relative -mt-20 lg:-mt-32 z-10 pb-16" data-categories>
           {categories.map((category) => {
             const categoryVideos = getVideosByCategory(category.id);
@@ -69,6 +79,8 @@ const Index = () => {
                   videos={categoryVideos.map((v) => ({
                     image: v.thumbnail_url,
                     title: v.title,
+                    videoUrl: v.video_url,
+                    onPlay: () => handlePlayVideo(v.video_url),
                   }))}
                 />
               </div>
@@ -76,6 +88,22 @@ const Index = () => {
           })}
         </div>
       </main>
+
+      {/* Video Dialog */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-7xl w-full h-[90vh] p-0">
+          <div className="w-full h-full">
+            {selectedVideo && (
+              <video
+                src={selectedVideo}
+                controls
+                autoPlay
+                className="w-full h-full object-contain bg-black"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
