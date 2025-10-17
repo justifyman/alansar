@@ -20,7 +20,7 @@ const VideoCard = ({ image, title, description, onPlay }: VideoCardProps) => {
 
   return (
     <div
-      className="relative group cursor-pointer flex-shrink-0 w-80 lg:w-96 transition-all duration-300 hover:scale-105 hover:z-10"
+      className="relative group cursor-pointer flex-shrink-0 w-72 sm:w-80 lg:w-96 transition-all duration-300 hover:scale-105 hover:z-10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

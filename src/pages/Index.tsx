@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import ContentRow from "@/components/ContentRow";
 import Announcements from "@/components/Announcements";
+import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -105,6 +106,8 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Footer />
     </div>
   );
 };

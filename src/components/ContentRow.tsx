@@ -30,13 +30,13 @@ const ContentRow = ({ title, videos }: ContentRowProps) => {
   };
 
   return (
-    <div className="group relative mb-8 lg:mb-12">
-      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-4 px-4 lg:px-16">
+    <div className="group relative mb-6 sm:mb-8 lg:mb-12">
+      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-3 sm:mb-4 px-4 lg:px-16">
         {title}
       </h2>
       
       <div className="relative px-4 lg:px-16">
-        <div className="pb-8 lg:pb-12 border-b border-white/20">
+        <div className="pb-6 sm:pb-8 lg:pb-12 border-b border-white/20">
           {/* Left Arrow */}
           {showLeftArrow && (
             <Button
@@ -52,7 +52,7 @@ const ContentRow = ({ title, videos }: ContentRowProps) => {
           {/* Scrollable Content */}
           <div
             ref={scrollRef}
-            className="flex gap-3 lg:gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+            className="flex gap-2 sm:gap-3 lg:gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {videos.map((video, index) => (
