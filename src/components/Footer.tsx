@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="px-4 lg:px-16 py-6 lg:py-8 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* Left: Copyright */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>© {new Date().getFullYear()} Alansar Stream</span>
+          <span>© {new Date().getFullYear()} AlAnsarMedia </span>
         </div>
 
         {/* Right: Social Links */}
