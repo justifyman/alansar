@@ -20,7 +20,7 @@ const VideoCard = ({ image, title, description, onPlay }: VideoCardProps) => {
 
   return (
     <div
-      className="relative group cursor-pointer flex-shrink-0 w-64 lg:w-72 transition-all duration-300 hover:scale-105 hover:z-10"
+      className="relative group cursor-pointer flex-shrink-0 w-80 lg:w-96 transition-all duration-300 hover:scale-105 hover:z-10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -56,8 +56,8 @@ const VideoCard = ({ image, title, description, onPlay }: VideoCardProps) => {
         )}
       </div>
       
-      {/* Title on hover */}
-      <div className={`mt-2 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Title always visible */}
+      <div className="mt-2">
         <h3 className="text-sm font-medium text-foreground">{title}</h3>
       </div>
     </div>

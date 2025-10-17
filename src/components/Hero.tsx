@@ -54,7 +54,7 @@ const Hero = () => {
 
         {/* Content */}
         <div className="relative h-full flex items-end lg:items-center pb-20 lg:pb-32 pl-4 lg:pl-16">
-          <div className="max-w-2xl space-y-4 lg:space-y-6 mt-2">
+          <div className="max-w-2xl space-y-4 lg:space-y-6 mt-5">
             <h1 className="text-4xl lg:text-6xl xl:text-7xl font-war font-bold text-foreground leading-tight">
               {heroData.title}
             </h1>
