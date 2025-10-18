@@ -48,7 +48,7 @@ const VideoCard = ({ image, title, description, onPlay }: VideoCardProps) => {
                   <Info className="h-4 w-4 text-foreground" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
+              <TooltipContent className="max-w-sm break-words whitespace-normal">
                 <p className="text-sm">{description}</p>
               </TooltipContent>
             </Tooltip>
