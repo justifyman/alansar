@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2, Edit, Check, X } from "lucide-react";
 
 interface Category {
   id: string;
@@ -40,6 +40,17 @@ interface Announcement {
   position: number;
 }
 
+interface UserUpload {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  video_url: string;
+  thumbnail_url: string;
+  status: string;
+  created_at: string;
+}
+
 const Admin = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,6 +59,7 @@ const Admin = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [heroData, setHeroData] = useState<HeroData | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [userUploads, setUserUploads] = useState<UserUpload[]>([]);
   
   // Form states
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -97,10 +109,12 @@ const Admin = () => {
     const { data: vids } = await supabase.from("videos").select("*");
     const { data: hero } = await supabase.from("hero").select("*").single();
     const { data: announcs } = await supabase.from("announcements").select("*").order("position");
+    const { data: uploads } = await supabase.from("user_uploads").select("*").order("created_at", { ascending: false });
     
     if (cats) setCategories(cats);
     if (vids) setVideos(vids);
     if (announcs) setAnnouncements(announcs);
+    if (uploads) setUserUploads(uploads);
     if (hero) {
       setHeroData(hero);
       setHeroTitle(hero.title);
@@ -305,6 +319,61 @@ const Admin = () => {
     }
   };
 
+  const handleApproveUpload = async (upload: UserUpload) => {
+    const { error } = await supabase.from("videos").insert({
+      title: upload.title,
+      description: upload.description,
+      video_url: upload.video_url,
+      thumbnail_url: upload.thumbnail_url,
+      category_id: selectedCategory,
+    });
+
+    if (error) {
+      toast({ title: "Error approving upload", variant: "destructive" });
+      return;
+    }
+
+    const { error: updateError } = await supabase
+      .from("user_uploads")
+      .update({ status: "approved" })
+      .eq("id", upload.id);
+
+    if (updateError) {
+      toast({ title: "Error updating status", variant: "destructive" });
+    } else {
+      toast({ title: "Upload approved and published" });
+      fetchData();
+    }
+  };
+
+  const handleRejectUpload = async (id: string) => {
+    const { error } = await supabase
+      .from("user_uploads")
+      .update({ status: "rejected" })
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "Error rejecting upload", variant: "destructive" });
+    } else {
+      toast({ title: "Upload rejected" });
+      fetchData();
+    }
+  };
+
+  const handleUpdateUpload = async (id: string, updates: Partial<UserUpload>) => {
+    const { error } = await supabase
+      .from("user_uploads")
+      .update(updates)
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "Error updating upload", variant: "destructive" });
+    } else {
+      toast({ title: "Upload updated" });
+      fetchData();
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -358,6 +427,7 @@ const Admin = () => {
             <TabsTrigger value="hero">Hero Section</TabsTrigger>
             <TabsTrigger value="announcements">Announcements</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
+            <TabsTrigger value="user-uploads">User Uploads</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
           </TabsList>
 
@@ -629,6 +699,102 @@ const Admin = () => {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="user-uploads" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Uploaded Videos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {userUploads.length === 0 ? (
+                  <p className="text-muted-foreground">No user uploads yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {userUploads.filter(u => u.status === "pending").map((upload) => (
+                      <div key={upload.id} className="border border-border rounded-lg p-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <img
+                              src={upload.thumbnail_url}
+                              alt={upload.title}
+                              className="w-full aspect-video object-cover rounded"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="font-semibold text-lg">{upload.title}</h3>
+                            <p className="text-sm text-muted-foreground">{upload.description}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Uploaded: {new Date(upload.created_at).toLocaleDateString()}
+                            </p>
+                            <div>
+                              <Label htmlFor={`category-${upload.id}`}>Assign Category</Label>
+                              <select
+                                id={`category-${upload.id}`}
+                                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                              >
+                                <option value="">Select a category</option>
+                                {categories.map((cat) => (
+                                  <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="flex gap-2 mt-4">
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => handleApproveUpload(upload)}
+                              >
+                                <Check className="h-4 w-4 mr-2" />
+                                Approve & Publish
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleRejectUpload(upload.id)}
+                              >
+                                <X className="h-4 w-4 mr-2" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {userUploads.filter(u => u.status !== "pending").length > 0 && (
+                      <>
+                        <h3 className="text-lg font-semibold mt-6">Processed Uploads</h3>
+                        {userUploads.filter(u => u.status !== "pending").map((upload) => (
+                          <div key={upload.id} className="border border-border rounded-lg p-4 opacity-60">
+                            <div className="flex items-center gap-4">
+                              <img
+                                src={upload.thumbnail_url}
+                                alt={upload.title}
+                                className="w-32 h-20 object-cover rounded"
+                              />
+                              <div className="flex-1">
+                                <h3 className="font-semibold">{upload.title}</h3>
+                                <p className="text-sm text-muted-foreground">{upload.description}</p>
+                              </div>
+                              <span className={`text-xs px-3 py-1 rounded ${
+                                upload.status === 'approved' ? 'bg-green-500/20 text-green-500' :
+                                'bg-red-500/20 text-red-500'
+                              }`}>
+                                {upload.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

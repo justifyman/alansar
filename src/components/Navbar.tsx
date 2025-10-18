@@ -1,9 +1,10 @@
-import { Search } from "lucide-react";
+import { Search, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface Category {
   id: string;
@@ -16,9 +17,20 @@ const Navbar = ({ onSearch }: { onSearch?: (query: string) => void }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
     fetchCategories();
+    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchCategories = async () => {
@@ -109,6 +121,22 @@ const Navbar = ({ onSearch }: { onSearch?: (query: string) => void }) => {
               >
                 <Search className="h-5 w-5" />
               </Button>
+            )}
+            
+            {user ? (
+              <Link to="/profile">
+                <Button variant="ghost" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
             )}
           </div>
         </div>
