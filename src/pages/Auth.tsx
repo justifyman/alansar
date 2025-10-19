@@ -82,7 +82,7 @@ const Auth = () => {
           .from("profile-pictures")
           .getPublicUrl(fileName);
 
-        await supabase
+        await (supabase as any)
           .from("profiles")
           .update({ profile_picture_url: publicUrl })
           .eq("id", authData.user.id);

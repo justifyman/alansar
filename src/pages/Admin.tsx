@@ -109,7 +109,7 @@ const Admin = () => {
     const { data: vids } = await supabase.from("videos").select("*");
     const { data: hero } = await supabase.from("hero").select("*").single();
     const { data: announcs } = await supabase.from("announcements").select("*").order("position");
-    const { data: uploads } = await supabase.from("user_uploads").select("*").order("created_at", { ascending: false });
+    const { data: uploads } = await (supabase as any).from("user_uploads").select("*").order("created_at", { ascending: false });
     
     if (cats) setCategories(cats);
     if (vids) setVideos(vids);
@@ -333,7 +333,7 @@ const Admin = () => {
       return;
     }
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from("user_uploads")
       .update({ status: "approved" })
       .eq("id", upload.id);
@@ -347,7 +347,7 @@ const Admin = () => {
   };
 
   const handleRejectUpload = async (id: string) => {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("user_uploads")
       .update({ status: "rejected" })
       .eq("id", id);
@@ -361,7 +361,7 @@ const Admin = () => {
   };
 
   const handleUpdateUpload = async (id: string, updates: Partial<UserUpload>) => {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("user_uploads")
       .update(updates)
       .eq("id", id);

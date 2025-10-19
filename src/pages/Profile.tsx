@@ -54,17 +54,21 @@ const Profile = () => {
   };
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("profiles")
       .select("*")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
     
-    if (data) setProfile(data);
+    if (data) {
+      setProfile(data);
+    } else {
+      setProfile({ id: userId, username: user?.email?.split("@")[0] || "User", profile_picture_url: null });
+    }
   };
 
   const fetchUploads = async (userId: string) => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("user_uploads")
       .select("*")
       .eq("user_id", userId)
@@ -91,7 +95,7 @@ const Profile = () => {
       const videoFileName = `${user.id}/${Date.now()}.${videoExt}`;
       
       const { error: videoError } = await supabase.storage
-        .from("user-videos")
+        .from("videos")
         .upload(videoFileName, uploadData.videoFile);
 
       if (videoError) throw videoError;
@@ -100,20 +104,20 @@ const Profile = () => {
       const thumbFileName = `${user.id}/${Date.now()}.${thumbExt}`;
       
       const { error: thumbError } = await supabase.storage
-        .from("user-thumbnails")
+        .from("thumbnails")
         .upload(thumbFileName, uploadData.thumbnailFile);
 
       if (thumbError) throw thumbError;
 
       const { data: { publicUrl: videoUrl } } = supabase.storage
-        .from("user-videos")
+        .from("videos")
         .getPublicUrl(videoFileName);
 
       const { data: { publicUrl: thumbUrl } } = supabase.storage
-        .from("user-thumbnails")
+        .from("thumbnails")
         .getPublicUrl(thumbFileName);
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await (supabase as any)
         .from("user_uploads")
         .insert({
           user_id: user.id,

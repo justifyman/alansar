@@ -100,8 +100,8 @@ const Index = () => {
                 src={selectedVideo}
                 controls
                 autoPlay
-                className="w-full h-full"
-                style={{ objectFit: 'contain' }}
+                className="max-w-full max-h-full"
+                style={{ objectFit: 'contain', objectPosition: 'center' }}
               />
             )}
           </div>
