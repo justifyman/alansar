@@ -90,7 +90,7 @@ const Auth = () => {
 
       toast({
         title: "Account created!",
-        description: "Welcome to Pure Tawheed Media!",
+        description: "Welcome to AlAnsarMedia!",
       });
 
       navigate("/");
@@ -150,7 +150,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Pure Tawheed Media</CardTitle>
+          <CardTitle>AlAnsarMedia</CardTitle>
           <CardDescription>Join our community</CardDescription>
         </CardHeader>
         <CardContent>
