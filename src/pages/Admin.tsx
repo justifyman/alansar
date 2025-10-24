@@ -9,8 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Trash2, Edit, Check, X } from "lucide-react";
-import { User } from "@supabase/supabase-js";
-
 interface Category {
   id: string;
   name: string;
@@ -54,9 +52,8 @@ interface UserUpload {
 
 const Admin = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [heroData, setHeroData] = useState<HeroData | null>(null);
@@ -84,46 +81,25 @@ const Admin = () => {
   const [announcementContent, setAnnouncementContent] = useState("");
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
 
+  const ADMIN_PASSWORD = "alansaradmins26";
+
   useEffect(() => {
-    checkAuth();
+    const auth = sessionStorage.getItem("adminAuth");
+    if (auth === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      fetchData();
+    }
   }, []);
 
-  const checkAuth = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-
-      setUser(session.user);
-
-      // Check if user has admin role
-      const { data: roleData } = await (supabase as any)
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!roleData) {
-        toast({ 
-          title: "Access Denied", 
-          description: "You do not have admin privileges",
-          variant: "destructive" 
-        });
-        navigate("/");
-        return;
-      }
-
-      setIsAdmin(true);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      sessionStorage.setItem("adminAuth", ADMIN_PASSWORD);
+      setIsAuthenticated(true);
       fetchData();
-    } catch (error) {
-      console.error("Auth check error:", error);
-      navigate("/auth");
-    } finally {
-      setLoading(false);
+      toast({ title: "Login successful" });
+    } else {
+      toast({ title: "Invalid password", variant: "destructive" });
     }
   };
 
@@ -397,16 +373,33 @@ const Admin = () => {
     }
   };
 
-  if (loading) {
+  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-foreground">Loading...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Admin Login</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
-  }
-
-  if (!user || !isAdmin) {
-    return null;
   }
 
   return (
@@ -418,9 +411,9 @@ const Admin = () => {
             <Button onClick={() => navigate("/")}>Back to Home</Button>
             <Button
               variant="destructive"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                navigate("/");
+              onClick={() => {
+                sessionStorage.removeItem("adminAuth");
+                setIsAuthenticated(false);
               }}
             >
               Logout
