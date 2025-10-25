@@ -340,8 +340,9 @@ const Admin = () => {
     if (updateError) {
       toast({ title: "Error updating status", variant: "destructive" });
     } else {
+      // Remove from local state
+      setUserUploads(prev => prev.filter(u => u.id !== upload.id));
       toast({ title: "Upload approved and published" });
-      fetchData();
     }
   };
 
@@ -354,8 +355,9 @@ const Admin = () => {
     if (error) {
       toast({ title: "Error rejecting upload", variant: "destructive" });
     } else {
+      // Remove from local state
+      setUserUploads(prev => prev.filter(u => u.id !== id));
       toast({ title: "Upload rejected" });
-      fetchData();
     }
   };
 
