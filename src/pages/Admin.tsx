@@ -108,7 +108,11 @@ const Admin = () => {
     const { data: vids } = await supabase.from("videos").select("*");
     const { data: hero } = await supabase.from("hero").select("*").single();
     const { data: announcs } = await supabase.from("announcements").select("*").order("position");
-    const { data: uploads } = await (supabase as any).from("user_uploads").select("*").order("created_at", { ascending: false });
+    const { data: uploads } = await (supabase as any)
+      .from("user_uploads")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
     
     if (cats) setCategories(cats);
     if (vids) setVideos(vids);
