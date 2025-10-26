@@ -60,6 +60,14 @@ const Admin = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [userUploads, setUserUploads] = useState<UserUpload[]>([]);
   
+  // Admin edit states
+const [editingUploadId, setEditingUploadId] = useState<string | null>(null);
+const [editingTitle, setEditingTitle] = useState("");
+const [editingDescription, setEditingDescription] = useState("");
+const [editingThumbnailFile, setEditingThumbnailFile] = useState<File | null>(null);
+const [editingSaving, setEditingSaving] = useState(false);
+
+  
   // Form states
   const [newCategoryName, setNewCategoryName] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
