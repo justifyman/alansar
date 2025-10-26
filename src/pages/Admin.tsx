@@ -323,7 +323,9 @@ const Admin = () => {
   };
 
   const handleApproveUpload = async (upload: UserUpload) => {
-    const { error } = await supabase.from("videos").insert({
+  try {
+    // create the video entry
+    const { error: insertError } = await supabase.from("videos").insert({
       title: upload.title,
       description: upload.description,
       video_url: upload.video_url,
@@ -331,24 +333,30 @@ const Admin = () => {
       category_id: selectedCategory,
     });
 
-    if (error) {
+    if (insertError) {
       toast({ title: "Error approving upload", variant: "destructive" });
       return;
     }
 
+    // mark the user_uploads row as approved so it no longer returns as pending
     const { error: updateError } = await (supabase as any)
       .from("user_uploads")
       .update({ status: "approved" })
       .eq("id", upload.id);
 
     if (updateError) {
-      toast({ title: "Error updating status", variant: "destructive" });
-    } else {
-      // Remove from local state
-      setUserUploads(prev => prev.filter(u => u.id !== upload.id));
-      toast({ title: "Upload approved and published" });
+      toast({ title: "Error updating upload status", variant: "destructive" });
+      return;
     }
-  };
+
+    // update UI immediately and ensure future mounts show correct state
+    setUserUploads(prev => prev.filter(u => u.id !== upload.id));
+    toast({ title: "Upload approved" });
+    fetchData(); // ensure any other admin lists refresh
+  } catch (err) {
+    toast({ title: "Unexpected error approving upload", variant: "destructive" });
+  }
+};
 
   const handleRejectUpload = async (id: string) => {
     const { error } = await (supabase as any)
