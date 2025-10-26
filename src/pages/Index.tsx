@@ -93,18 +93,16 @@ const Index = () => {
 
       {/* Video Dialog */}
       <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
-        <DialogContent className="max-w-7xl w-full h-[90vh] p-0">
-          <div className="w-full h-full flex items-center justify-center bg-black">
-            {selectedVideo && (
-              <video
-                src={selectedVideo}
-                controls
-                autoPlay
-                className="max-w-full max-h-full"
-                style={{ objectFit: 'contain', objectPosition: 'center' }}
-              />
-            )}
-          </div>
+        <DialogContent className="max-w-[95vw] w-full max-h-[95vh] p-0 flex items-center justify-center">
+          {selectedVideo && (
+            <video
+              src={selectedVideo}
+              controls
+              autoPlay
+              className="w-full h-full max-w-full max-h-[90vh] rounded-lg"
+              style={{ objectFit: 'contain' }}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
