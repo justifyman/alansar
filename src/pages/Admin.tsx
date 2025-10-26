@@ -359,19 +359,20 @@ const Admin = () => {
 };
 
   const handleRejectUpload = async (id: string) => {
-    const { error } = await (supabase as any)
-      .from("user_uploads")
-      .update({ status: "rejected" })
-      .eq("id", id);
+  const { error } = await (supabase as any)
+    .from("user_uploads")
+    .update({ status: "rejected" })
+    .eq("id", id);
 
-    if (error) {
-      toast({ title: "Error rejecting upload", variant: "destructive" });
-    } else {
-      // Remove from local state
-      setUserUploads(prev => prev.filter(u => u.id !== id));
-      toast({ title: "Upload rejected" });
-    }
-  };
+  if (error) {
+    toast({ title: "Error rejecting upload", variant: "destructive" });
+  } else {
+    setUserUploads(prev => prev.filter(u => u.id !== id));
+    toast({ title: "Upload rejected" });
+    fetchData(); // ensure re-fetch so the pending list never brings it back
+  }
+};
+
 
   const handleUpdateUpload = async (id: string, updates: Partial<UserUpload>) => {
     const { error } = await (supabase as any)
