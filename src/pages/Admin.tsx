@@ -127,7 +127,6 @@ const [editingSaving, setEditingSaving] = useState(false);
     const { data: uploads } = await (supabase as any)
       .from("user_uploads")
       .select("*")
-      .eq("status", "pending")
       .order("created_at", { ascending: false });
     
     if (cats) setCategories(cats);
@@ -365,10 +364,9 @@ const [editingSaving, setEditingSaving] = useState(false);
       return;
     }
 
-    // update UI immediately and ensure future mounts show correct state
+    // update UI immediately
     setUserUploads(prev => prev.filter(u => u.id !== upload.id));
     toast({ title: "Upload approved" });
-    fetchData(); // ensure any other admin lists refresh
   } catch (err) {
     toast({ title: "Unexpected error approving upload", variant: "destructive" });
   }
@@ -385,7 +383,6 @@ const [editingSaving, setEditingSaving] = useState(false);
   } else {
     setUserUploads(prev => prev.filter(u => u.id !== id));
     toast({ title: "Upload rejected" });
-    fetchData(); // ensure re-fetch so the pending list never brings it back
   }
 };
 
@@ -775,55 +772,128 @@ const [editingSaving, setEditingSaving] = useState(false);
                   <div className="space-y-4">
                     {userUploads.filter(u => u.status === "pending").map((upload) => (
                       <div key={upload.id} className="border border-border rounded-lg p-4">
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <img
-                              src={upload.thumbnail_url}
-                              alt={upload.title}
-                              className="w-full aspect-video object-cover rounded"
-                            />
+                        {editingUploadId === upload.id ? (
+                          <div className="space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <img
+                                  src={editingThumbnailFile ? URL.createObjectURL(editingThumbnailFile) : upload.thumbnail_url}
+                                  alt="Thumbnail preview"
+                                  className="w-full aspect-video object-cover rounded"
+                                />
+                                <div className="mt-2">
+                                  <Label>Change Thumbnail</Label>
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setEditingThumbnailFile(e.target.files?.[0] || null)}
+                                  />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div>
+                                  <Label>Title</Label>
+                                  <Input
+                                    value={editingTitle}
+                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                    placeholder="Title"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Description</Label>
+                                  <Textarea
+                                    value={editingDescription}
+                                    onChange={(e) => setEditingDescription(e.target.value)}
+                                    placeholder="Description"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleSaveEdit(upload)}
+                                disabled={editingSaving}
+                              >
+                                {editingSaving ? "Saving..." : "Save Changes"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingUploadId(null);
+                                  setEditingTitle("");
+                                  setEditingDescription("");
+                                  setEditingThumbnailFile(null);
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <h3 className="font-semibold text-lg">{upload.title}</h3>
-                            <p className="text-sm text-muted-foreground">{upload.description}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Uploaded: {new Date(upload.created_at).toLocaleDateString()}
-                            </p>
+                        ) : (
+                          <div className="grid md:grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor={`category-${upload.id}`}>Assign Category</Label>
-                              <select
-                                id={`category-${upload.id}`}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2"
-                                onChange={(e) => setSelectedCategory(e.target.value)}
-                              >
-                                <option value="">Select a category</option>
-                                {categories.map((cat) => (
-                                  <option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                  </option>
-                                ))}
-                              </select>
+                              <img
+                                src={upload.thumbnail_url}
+                                alt={upload.title}
+                                className="w-full aspect-video object-cover rounded"
+                              />
                             </div>
-                            <div className="flex gap-2 mt-4">
-                              <Button
-                                size="sm"
-                                className="bg-green-600 hover:bg-green-700"
-                                onClick={() => handleApproveUpload(upload)}
-                              >
-                                <Check className="h-4 w-4 mr-2" />
-                                Approve & Publish
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleRejectUpload(upload.id)}
-                              >
-                                <X className="h-4 w-4 mr-2" />
-                                Reject
-                              </Button>
+                            <div className="space-y-2">
+                              <h3 className="font-semibold text-lg">{upload.title}</h3>
+                              <p className="text-sm text-muted-foreground">{upload.description}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Uploaded: {new Date(upload.created_at).toLocaleDateString()}
+                              </p>
+                              <div>
+                                <Label htmlFor={`category-${upload.id}`}>Assign Category</Label>
+                                <select
+                                  id={`category-${upload.id}`}
+                                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                                  onChange={(e) => setSelectedCategory(e.target.value)}
+                                >
+                                  <option value="">Select a category</option>
+                                  {categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>
+                                      {cat.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="flex gap-2 mt-4">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingUploadId(upload.id);
+                                    setEditingTitle(upload.title);
+                                    setEditingDescription(upload.description);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => handleApproveUpload(upload)}
+                                >
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Approve & Publish
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleRejectUpload(upload.id)}
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Reject
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))}
                     
