@@ -823,26 +823,87 @@ const [editingSaving, setEditingSaving] = useState(false);
                       <>
                         <h3 className="text-lg font-semibold mt-6">Processed Uploads</h3>
                         {userUploads.filter(u => u.status !== "pending").map((upload) => (
-                          <div key={upload.id} className="border border-border rounded-lg p-4 opacity-60">
-                            <div className="flex items-center gap-4">
-                              <img
-                                src={upload.thumbnail_url}
-                                alt={upload.title}
-                                className="w-32 h-20 object-cover rounded"
-                              />
-                              <div className="flex-1">
-                                <h3 className="font-semibold">{upload.title}</h3>
-                                <p className="text-sm text-muted-foreground">{upload.description}</p>
-                              </div>
-                              <span className={`text-xs px-3 py-1 rounded ${
-                                upload.status === 'approved' ? 'bg-green-500/20 text-green-500' :
-                                'bg-red-500/20 text-red-500'
-                              }`}>
-                                {upload.status}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+  <div key={upload.id} className="border border-border rounded-lg p-4">
+    {editingUploadId === upload.id ? (
+      <div className="space-y-2">
+        <Input
+          value={editingTitle}
+          onChange={(e) => setEditingTitle(e.target.value)}
+          placeholder="Title"
+        />
+        <Textarea
+          value={editingDescription}
+          onChange={(e) => setEditingDescription(e.target.value)}
+          placeholder="Description"
+        />
+        <div>
+          <Label>New Thumbnail (optional)</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setEditingThumbnailFile(e.target.files?.[0] || null)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() => handleSaveEdit(upload)}
+            disabled={editingSaving}
+          >
+            {editingSaving ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setEditingUploadId(null);
+              setEditingTitle("");
+              setEditingDescription("");
+              setEditingThumbnailFile(null);
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    ) : (
+      <div className="flex items-center gap-4">
+        <img
+          src={upload.thumbnail_url}
+          alt={upload.title}
+          className="w-32 h-20 object-cover rounded"
+        />
+        <div className="flex-1">
+          <h3 className="font-semibold">{upload.title}</h3>
+          <p className="text-sm text-muted-foreground">{upload.description}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-xs px-3 py-1 rounded ${
+              upload.status === "approved"
+                ? "bg-green-500/20 text-green-500"
+                : "bg-red-500/20 text-red-500"
+            }`}
+          >
+            {upload.status}
+          </span>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => {
+              setEditingUploadId(upload.id);
+              setEditingTitle(upload.title);
+              setEditingDescription(upload.description);
+            }}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    )}
+  </div>
+))}
+
                       </>
                     )}
                   </div>
