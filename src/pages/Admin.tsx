@@ -98,6 +98,14 @@ const [editingSaving, setEditingSaving] = useState(false);
       fetchData();
     }
   }, []);
+  useEffect(() => {
+  const handleFocus = () => {
+    if (isAuthenticated) fetchData();
+  };
+  window.addEventListener("focus", handleFocus);
+  return () => window.removeEventListener("focus", handleFocus);
+}, [isAuthenticated]);
+
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
