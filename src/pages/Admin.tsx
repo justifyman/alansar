@@ -396,6 +396,36 @@ const [editingSaving, setEditingSaving] = useState(false);
     }
   };
 
+  const handleSaveEdit = async (upload: UserUpload) => {
+  try {
+    setEditingSaving(true);
+    let thumbnailUrl = upload.thumbnail_url;
+
+    if (editingThumbnailFile) {
+      // reuse uploadFile utility already in this file
+      thumbnailUrl = await uploadFile(editingThumbnailFile, "thumbnails");
+    }
+
+    const updates: Partial<UserUpload> = {
+      title: editingTitle,
+      description: editingDescription,
+      thumbnail_url: thumbnailUrl,
+    };
+
+    await handleUpdateUpload(upload.id, updates);
+    setEditingUploadId(null);
+    setEditingThumbnailFile(null);
+    setEditingTitle("");
+    setEditingDescription("");
+    fetchData();
+  } catch (err) {
+    toast({ title: "Error saving edit", variant: "destructive" });
+  } finally {
+    setEditingSaving(false);
+  }
+};
+
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
